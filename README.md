@@ -28,30 +28,13 @@ docker run -d -p 3030:3030 -p 3333:3333 \
 
 Clone the repository
 ```bash
-git clone https://github.com/bitsensor/elastalert.git && cd elastalert
+git clone https://github.com/moetemad/elastalert.git && cd elastalert
 ```
 
 Build the image
 ```
-make build
+docker build .
 ```
-which is equivalent of
-```
-docker pull alpine:latest && docker pull node:latest
-docker build -t elastalert .
-```
-
-### Options
-
-Using a custom ElastAlert version (a [release from github](https://github.com/Yelp/elastalert/releases)) e.g. `master` or `v0.1.28`
-```bash
-make build v=v0.1.28
-```
-Using a custom mirror
-```bash
-docker build --build-arg ELASTALERT_URL=http://example.mirror.com/master.zip -t elastalert .
-```
-
 ## Configuration
 In `config/config.yaml` you'll find the default config. Change this file based on your needs. There is also a config/elastalert.yaml that should be changed. 
 
