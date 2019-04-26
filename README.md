@@ -9,19 +9,8 @@
 ---
 
 ## Installation
-The most convenient way to run the ElastAlert server is by using our Docker container image. The default configuration uses `localhost:9200` as ElasticSearch host, if this is not the case in your setup please edit `es_host` and `es_port` in both the `elastalert.yaml` and `config.json` configuration files.
+The most convenient way to run the ElastAlert server is by using our Docker container image. The default configuration uses `localhost:9200` as ElasticSearch host, if this is not the case in your setup please edit `es_host` and `es_port` in both the `elastalert.yaml` and `config.yaml` configuration files.
 
-To run the Docker image you will want to mount the volumes for configuration and rule files to keep them after container updates. In order to do that conveniently, please do: `git clone https://github.com/bitsensor/elastalert.git; cd elastalert`
-
-```bash
-docker run -d -p 3030:3030 -p 3333:3333 \
-    -v `pwd`/config/elastalert.yaml:/opt/elastalert/config.yaml \
-    -v `pwd`/config/elastalert-test.yaml:/opt/elastalert/config-test.yaml \
-    -v `pwd`/config/config.json:/opt/elastalert-server/config/config.json \
-    -v `pwd`/rules:/opt/elastalert/rules \
-    -v `pwd`/rule_templates:/opt/elastalert/rule_templates \
-    --net="host" \
-    --name elastalert bitsensor/elastalert:latest
 ```
 
 ## Building Docker image
