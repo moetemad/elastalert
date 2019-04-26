@@ -53,70 +53,8 @@ docker build --build-arg ELASTALERT_URL=http://example.mirror.com/master.zip -t 
 ```
 
 ## Configuration
-In `config/config.example.json` you'll find the default config. You can make a `config.json` file in the same folder that overrides the default config. When forking this repository it is recommended to remove `config.json` from the `.gitignore` file. For local testing purposes you can then use a `config.dev.json` file which overrides `config.json`.
+In `config/config.yaml` you'll find the default config. Change this file based on your needs. There is also a config/elastalert.yaml that should be changed. 
 
-You can use the following config options:
-
-```javascript
-{
-  "appName": "elastalert-server", // The name used by the logging framework.
-  "port": 3030, // The port to bind to
-  "wsport": 3333, // The port to bind to for websockets
-  "elastalertPath": "/opt/elastalert",  // The path to the root ElastAlert folder. It's the folder that contains the `setup.py` script.
-  "start": "2014-01-01T00:00:00", // Optional date to start querying from
-  "end": "2016-01-01T00:00:00", // Optional date to stop querying at
-  "verbose": true, // Optional, will increase the logging verboseness, which allows you to see information about the state of queries.
-  "es_debug": true, // Optional, will enable logging for all queries made to Elasticsearch
-  "debug": false, // Will run ElastAlert in debug mode. This will increase the logging verboseness, change all alerts to DebugAlerter, which prints alerts and suppresses their normal action, and skips writing search and alert metadata back to Elasticsearch.
-  "rulesPath": { // The path to the rules folder containing all the rules. If the folder is empty a dummy file will be created to allow ElastAlert to start.
-    "relative": true, // Whether to use a path relative to the `elastalertPath` folder.
-    "path": "/rules" // The path to the rules folder. 
-  },
-  "templatesPath": { // The path to the rules folder containing all the rule templates. If the folder is empty a dummy file will be created to allow ElastAlert to start.
-    "relative": true, // Whether to use a path relative to the `elastalertPath` folder.
-    "path": "/rule_templates" // The path to the rule templates folder.
-  },
-  "dataPath": { // The path to a folder that the server can use to store data and temporary files.
-    "relative": true, // Whether to use a path relative to the `elastalertPath` folder.
-    "path": "/server_data" // The path to the data folder.
-  },
-  "es_host": "localhost", // For getting metadata and field mappings, connect to this ES server
-  "es_port": 9200, // Port for above
-  "writeback_index": "elastalert_status" // Writeback index to examine for /metadata endpoint
-}
-```
-
-ElastAlert also expects a `elastalert.yaml` with at least the following options.
-```yaml
-# The elasticsearch hostname for metadata writeback
-# Note that every rule can have its own elasticsearch host
-es_host: localhost
-
-# The elasticsearch port
-es_port: 9200
-
-# The index on es_host which is used for metadata storage
-# This can be a unmapped index, but it is recommended that you run
-# elastalert-create-index to set a mapping
-writeback_index: elastalert_status
-
-# This is the folder that contains the rule yaml files
-# Any .yaml file will be loaded as a rule
-rules_folder: rules
-
-# How often ElastAlert will query elasticsearch
-# The unit can be anything from weeks to seconds
-run_every:
-  seconds: 5
-
-# ElastAlert will buffer results from the most recent
-# period of time, in case some log sources are not in real time
-buffer_time:
-  minutes: 1
-```
-
-There is also a `elastalert-test.yaml` file which is only used when you use the API to test a rule. This allows you to write to a different `writeback_index` for example when testing rules.
- 
 ## API
 This server exposes the following REST API's:
 

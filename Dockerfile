@@ -1,49 +1,27 @@
-FROM alpine:latest as py-ea
-ARG ELASTALERT_VERSION=v0.1.39
-ENV ELASTALERT_VERSION=${ELASTALERT_VERSION}
-# URL from which to download Elastalert.
-ARG ELASTALERT_URL=https://github.com/Yelp/elastalert/archive/$ELASTALERT_VERSION.zip
-ENV ELASTALERT_URL=${ELASTALERT_URL}
-# Elastalert home directory full path.
-ENV ELASTALERT_HOME /opt/elastalert
+FROM python:2.7-alpine AS builder
+ARG ELASTALERT_VERSION=0.1.39
+ARG ELASTALERT_HOME=/opt/elastalert
 
-WORKDIR /opt
-
-RUN apk add --update --no-cache ca-certificates openssl-dev openssl python2-dev python2 py2-pip py2-yaml libffi-dev gcc musl-dev wget && \
-# Download and unpack Elastalert.
-    wget -O elastalert.zip "${ELASTALERT_URL}" && \
+RUN apk add --update ca-certificates openssl-dev openssl libffi-dev gcc musl-dev wget && \
+    wget https://github.com/matsgoran/elastalert/archive/doc_type_and_support_for_es66_es7.zip -O elastalert.zip && \
     unzip elastalert.zip && \
-    rm elastalert.zip && \
-    mv e* "${ELASTALERT_HOME}"
+    mv elastalert-* "${ELASTALERT_HOME}"
 
 WORKDIR "${ELASTALERT_HOME}"
 
-# Install Elastalert.
-# see: https://github.com/Yelp/elastalert/issues/1654
-RUN sed -i 's/jira>=1.0.10/jira>=1.0.10,<1.0.15/g' setup.py && \
+# Needed until https://github.com/Yelp/elastalert/pull/2194 is merged
+RUN sed -i 's/elasticsearch/elasticsearch>=7.0.0,<8.0.0/' requirements.txt && \
+    sed -i "s/'elasticsearch',/'elasticsearch>=7.0.0,<8.0.0',/" setup.py && \
     python setup.py install && \
     pip install -r requirements.txt
 
-FROM node:alpine
-LABEL maintainer="BitSensor <dev@bitsensor.io>"
-# Set timezone for this container
-ENV TZ Etc/UTC
+FROM python:2.7-alpine AS runner
+RUN apk add --update --no-cache curl tzdata make libmagic
+COPY --from=builder /usr/local/lib/python2.7/site-packages/ /usr/local/lib/python2.7/site-packages/
+COPY --from=builder /opt/elastalert /opt/elastalert
+COPY --from=builder /usr/local/bin/elastalert* /usr/local/bin/
 
-RUN apk add --update --no-cache curl tzdata python2 make libmagic
-
-COPY --from=py-ea /usr/lib/python2.7/site-packages /usr/lib/python2.7/site-packages
-COPY --from=py-ea /opt/elastalert /opt/elastalert
-COPY --from=py-ea /usr/bin/elastalert* /usr/bin/
-
-WORKDIR /opt/elastalert-server
-COPY . /opt/elastalert-server
-
-RUN npm install --production --quiet
-COPY config/elastalert.yaml /opt/elastalert/config.yaml
-COPY config/elastalert-test.yaml /opt/elastalert/config-test.yaml
-COPY config/config.json config/config.json
-COPY rule_templates/ /opt/elastalert/rule_templates
-COPY elastalert_modules/ /opt/elastalert/elastalert_modules
-
+WORKDIR /opt/elastalert
+COPY . /opt/elastalert
 EXPOSE 3030
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["/usr/local/bin/elastalert"]

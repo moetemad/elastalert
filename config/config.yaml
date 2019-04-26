@@ -1,0 +1,24 @@
+############################################
+# For a full list of fields, visit: 
+# https://elastalert.readthedocs.io/en/latest/ruletypes.html
+############################################
+
+# Elasticsearch host and port
+es_host: elasticsearch
+es_port: 9200
+
+# Elasticsearch index for writing status of elastalert
+writeback_index: elastalert_status
+rules_folder: /opt/elastalert/rules
+
+# How often ElastAlert will query elasticsearch
+run_every:
+  seconds: 5
+
+# The filed that elastalert should look for the timestamp in the index
+timestamp_field: Timestamp
+timestamp_format_expr: 'ts[:23] + ts[26:]'
+
+# How long elastalert should buffer alerts
+buffer_time:
+  days: 100
