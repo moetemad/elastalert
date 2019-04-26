@@ -11,8 +11,6 @@
 ## Installation
 The most convenient way to run the ElastAlert server is by using our Docker container image. The default configuration uses `localhost:9200` as ElasticSearch host, if this is not the case in your setup please edit `es_host` and `es_port` in both the `elastalert.yaml` and `config.yaml` configuration files.
 
-```
-
 ## Building Docker image
 
 Clone the repository
